@@ -1,0 +1,4 @@
+dupe-finder
+===========
+
+Duplicate finder
