@@ -1,4 +1,5 @@
 package updater;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -29,265 +30,238 @@ import javax.swing.JTextArea;
 
 import app.Main;
 
+public class Main_Gui extends JFrame {
 
+	private Thread worker;
+	private final String root = "update/";
 
-public class Main_Gui extends JFrame{
+	private JTextArea outText;
+	private JButton cancle;
+	private JButton launch;
+	private JScrollPane sp;
+	private JPanel pan1;
+	private JPanel pan2;
 
-    private Thread worker;
-    private final String root = "update/";
+	public Main_Gui() {
+		initComponents();
+		outText.setText("Contacting Download Server...");
+		download();
+	}
 
-    private JTextArea outText;
-    private JButton cancle;
-    private JButton launch;
-    private JScrollPane sp;
-    private JPanel pan1;
-    private JPanel pan2;
+	private void initComponents() {
 
-     public Main_Gui() {
-        initComponents();
-        outText.setText("Contacting Download Server...");
-        download();
-    }
-    private void initComponents() {
+		this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+		this.setResizable(false);
+		this.setTitle("Updating");
 
-        this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        this.setResizable(false);
-        this.setTitle("Updating");
-       
+		pan1 = new JPanel();
+		pan1.setLayout(new BorderLayout());
 
-        pan1 = new JPanel();
-        pan1.setLayout(new BorderLayout());
+		pan2 = new JPanel();
+		pan2.setLayout(new FlowLayout());
 
-        pan2 = new JPanel();
-        pan2.setLayout(new FlowLayout());
+		outText = new JTextArea();
+		sp = new JScrollPane();
+		sp.setViewportView(outText);
 
-        outText = new JTextArea();
-        sp = new JScrollPane();
-        sp.setViewportView(outText);
-        
-        launch = new JButton("Launch App");
-        launch.setEnabled(false);
-        launch.addActionListener(new ActionListener(){
+		launch = new JButton("Launch App");
+		launch.setEnabled(false);
+		launch.addActionListener(new ActionListener() {
 
-            public void actionPerformed(ActionEvent e) {
-                launch();
-            }
-        });
-        pan2.add(launch);
+			public void actionPerformed(ActionEvent e) {
+				launch();
+			}
+		});
+		pan2.add(launch);
 
-        cancle = new JButton("Cancel Update");
-        cancle.addActionListener(new ActionListener(){
+		cancle = new JButton("Cancel Update");
+		cancle.addActionListener(new ActionListener() {
 
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
-        pan2.add(cancle);
-        pan1.add(sp,BorderLayout.CENTER);
-        pan1.add(pan2,BorderLayout.SOUTH);
+			public void actionPerformed(ActionEvent e) {
+				System.exit(0);
+			}
+		});
+		pan2.add(cancle);
+		pan1.add(sp, BorderLayout.CENTER);
+		pan1.add(pan2, BorderLayout.SOUTH);
 
-        add(pan1);
-        pack();
-        this.setSize(400, 300);
-    }
+		add(pan1);
+		pack();
+		this.setSize(400, 300);
+	}
 
-    private void download()
-    {
-        worker = new Thread(
-        new Runnable(){
-            public void run()
-            {
-                try {
-                    downloadFile(getDownloadLinkFromHost());
-                    unzip();
-                    renameJarFile();
-                    copyFiles(new File(root),new File("").getAbsolutePath());
-                    cleanup();
-                    launch.setEnabled(true);
-                    outText.setText(outText.getText()+"\nUpdate Finished!");
-                    cancle.setEnabled(false);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(null, "An error occured while preforming update!");
-                }
-            }
-        });
-        worker.start();
-    }
-    private void launch()
-    {
-       
-    	String[] run = {"java","-jar","new.jar"};
-    	File newName = null;
-    	try {
+	private void download() {
+		worker = new Thread(new Runnable() {
+			public void run() {
+				try {
+					downloadFile(getDownloadLinkFromHost());
+					unzip();
+					renameJarFile();
+					copyFiles(new File(root), new File("").getAbsolutePath());
+					cleanup();
+					launch.setEnabled(true);
+					outText.setText(outText.getText() + "\nUpdate Finished!");
+					cancle.setEnabled(false);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+					JOptionPane.showMessageDialog(null, "An error occured while preforming update!");
+				}
+			}
+		});
+		worker.start();
+	}
+
+	private void launch() {
+
+		String[] run = { "java", "-jar", "new.jar" };
+		File newName = null;
+		try {
 			newName = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
-    	run[2] = newName.getName();
-    	
-        try {
-            Runtime.getRuntime().exec(run);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        System.exit(0);
-    }
-    private void cleanup()
-    {
-        outText.setText(outText.getText()+"\nPreforming clean up...");
-        File f = new File("update.zip");
-        f.delete();
-        remove(new File(root));
-        new File(root).delete();
-    }
-    private void remove(File f)
-    {
-        File[]files = f.listFiles();
-        for(File ff:files)
-        {
-            if(ff.isDirectory())
-            {
-                remove(ff);
-                ff.delete();
-            }
-            else
-            {
-                ff.delete();
-            }
-        }
-    }
-    
-    public void renameJarFile() {
-    	
-    	
+		run[2] = newName.getName();
 
-    	
-    	String currectFileName= new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getName();
-    	
-    	
-    	File oldName = new File(root+"new.jar");
-    	File newName = new File(root+currectFileName);
-    	oldName.renameTo(newName);
-    	
+		try {
+			Runtime.getRuntime().exec(run);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		System.exit(0);
+	}
 
-    	
-    }
-    
-    
-    private void copyFiles(File f,String dir) throws IOException
-    {
-        File[]files = f.listFiles();
-        for(File ff:files)
-        {
-            if(ff.isDirectory()){
-                new File(dir+"/"+ff.getName()).mkdir();
-                copyFiles(ff,dir+"/"+ff.getName());
-            }
-            else
-            {
-                copy(ff.getAbsolutePath(),dir+"/"+ff.getName());
-            }
+	private void cleanup() {
+		outText.setText(outText.getText() + "\nPreforming clean up...");
+		File f = new File("update.zip");
+		f.delete();
+		remove(new File(root));
+		new File(root).delete();
+	}
 
-        }
-    }
-    public void copy(String srFile, String dtFile) throws FileNotFoundException, IOException{
+	private void remove(File f) {
+		File[] files = f.listFiles();
+		for (File ff : files) {
+			if (ff.isDirectory()) {
+				remove(ff);
+				ff.delete();
+			} else {
+				ff.delete();
+			}
+		}
+	}
 
-          File f1 = new File(srFile);
-          File f2 = new File(dtFile);
+	public void renameJarFile() {
 
-          InputStream in = new FileInputStream(f1);
+		String currectFileName = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath())
+				.getName();
 
-          OutputStream out = new FileOutputStream(f2);
+		File oldName = new File(root + "new.jar");
+		File newName = new File(root + currectFileName);
+		oldName.renameTo(newName);
 
-          byte[] buf = new byte[1024];
-          int len;
-          while ((len = in.read(buf)) > 0){
-            out.write(buf, 0, len);
-          }
-          in.close();
-          out.close();
-      }
-    private void unzip() throws IOException
-    {
-         int BUFFER = 2048;
-         BufferedOutputStream dest = null;
-         BufferedInputStream is = null;
-         ZipEntry entry;
-         ZipFile zipfile = new ZipFile("update.zip");
-         Enumeration e = zipfile.entries();
-         (new File(root)).mkdir();
-         while(e.hasMoreElements()) {
-            entry = (ZipEntry) e.nextElement();
-            outText.setText(outText.getText()+"\nExtracting: " +entry);
-            if(entry.isDirectory())
-                (new File(root+entry.getName())).mkdir();
-            else{
-                (new File(root+entry.getName())).createNewFile();
-                is = new BufferedInputStream
-                  (zipfile.getInputStream(entry));
-                int count;
-                byte data[] = new byte[BUFFER];
-                FileOutputStream fos = new
-                  FileOutputStream(root+entry.getName());
-                dest = new
-                  BufferedOutputStream(fos, BUFFER);
-                while ((count = is.read(data, 0, BUFFER))
-                  != -1) {
-                   dest.write(data, 0, count);
-                }
-                dest.flush();
-                dest.close();
-                is.close();
-            }
-         }
-         // rename the new file name to the old
-         
+	}
 
-    }
-    private void downloadFile(String link) throws MalformedURLException, IOException
-    {
-        URL url = new URL(link);
-        URLConnection conn = url.openConnection();
-        InputStream is = conn.getInputStream();
-        long max = conn.getContentLength();
-        outText.setText(outText.getText()+"\n"+"Downloding file...\nUpdate Size(compressed): "+max+" Bytes");
-        BufferedOutputStream fOut = new BufferedOutputStream(new FileOutputStream(new File("update.zip")));
-        byte[] buffer = new byte[32 * 1024];
-        int bytesRead = 0;
-        int in = 0;
-        while ((bytesRead = is.read(buffer)) != -1) {
-            in += bytesRead;
-            fOut.write(buffer, 0, bytesRead);
-        }
-        fOut.flush();
-        fOut.close();
-        is.close();
-        outText.setText(outText.getText()+"\nDownload Complete!");
+	private void copyFiles(File f, String dir) throws IOException {
+		File[] files = f.listFiles();
+		for (File ff : files) {
+			if (ff.isDirectory()) {
+				new File(dir + "/" + ff.getName()).mkdir();
+				copyFiles(ff, dir + "/" + ff.getName());
+			} else {
+				copy(ff.getAbsolutePath(), dir + "/" + ff.getName());
+			}
 
-    }
-    private String getDownloadLinkFromHost() throws MalformedURLException, IOException {
-        String path = "http://xeon.co.il/updater/url.html";
-        URL url = new URL(path);
+		}
+	}
 
-        InputStream html = null;
+	public void copy(String srFile, String dtFile) throws FileNotFoundException, IOException {
 
-        html = url.openStream();
+		File f1 = new File(srFile);
+		File f2 = new File(dtFile);
 
-        int c = 0;
-        StringBuilder buffer = new StringBuilder("");
+		InputStream in = new FileInputStream(f1);
 
-        while(c != -1) {
-            c = html.read();
-        buffer.append((char)c);
+		OutputStream out = new FileOutputStream(f2);
 
-        }
-        return buffer.substring(buffer.indexOf("[url]")+5,buffer.indexOf("[/url]"));
-    }
-    
-    
-    
+		byte[] buf = new byte[1024];
+		int len;
+		while ((len = in.read(buf)) > 0) {
+			out.write(buf, 0, len);
+		}
+		in.close();
+		out.close();
+	}
 
+	private void unzip() throws IOException {
+		int BUFFER = 2048;
+		BufferedOutputStream dest = null;
+		BufferedInputStream is = null;
+		ZipEntry entry;
+		ZipFile zipfile = new ZipFile("update.zip");
+		Enumeration e = zipfile.entries();
+		(new File(root)).mkdir();
+		while (e.hasMoreElements()) {
+			entry = (ZipEntry) e.nextElement();
+			outText.setText(outText.getText() + "\nExtracting: " + entry);
+			if (entry.isDirectory())
+				(new File(root + entry.getName())).mkdir();
+			else {
+				(new File(root + entry.getName())).createNewFile();
+				is = new BufferedInputStream(zipfile.getInputStream(entry));
+				int count;
+				byte data[] = new byte[BUFFER];
+				FileOutputStream fos = new FileOutputStream(root + entry.getName());
+				dest = new BufferedOutputStream(fos, BUFFER);
+				while ((count = is.read(data, 0, BUFFER)) != -1) {
+					dest.write(data, 0, count);
+				}
+				dest.flush();
+				dest.close();
+				is.close();
+			}
+		}
+		// rename the new file name to the old
 
+	}
+
+	private void downloadFile(String link) throws MalformedURLException, IOException {
+		URL url = new URL(link);
+		URLConnection conn = url.openConnection();
+		InputStream is = conn.getInputStream();
+		long max = conn.getContentLength();
+		outText.setText(outText.getText() + "\n" + "Downloding file...\nUpdate Size(compressed): " + max + " Bytes");
+		BufferedOutputStream fOut = new BufferedOutputStream(new FileOutputStream(new File("update.zip")));
+		byte[] buffer = new byte[32 * 1024];
+		int bytesRead = 0;
+		int in = 0;
+		while ((bytesRead = is.read(buffer)) != -1) {
+			in += bytesRead;
+			fOut.write(buffer, 0, bytesRead);
+		}
+		fOut.flush();
+		fOut.close();
+		is.close();
+		outText.setText(outText.getText() + "\nDownload Complete!");
+
+	}
+
+	private String getDownloadLinkFromHost() throws MalformedURLException, IOException {
+		String path = "http://xeon.co.il/updater/url.html";
+		URL url = new URL(path);
+
+		InputStream html = null;
+
+		html = url.openStream();
+
+		int c = 0;
+		StringBuilder buffer = new StringBuilder("");
+
+		while (c != -1) {
+			c = html.read();
+			buffer.append((char) c);
+
+		}
+		return buffer.substring(buffer.indexOf("[url]") + 5, buffer.indexOf("[/url]"));
+	}
 
 }

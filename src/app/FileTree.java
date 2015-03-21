@@ -8,19 +8,15 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-
 public class FileTree extends SimpleFileVisitor<Path> {
-	
+
 	HashSet<Path> filesArray;
-	
 
 	// Contractor
 	public FileTree(HashSet<Path> filesArray) {
 		this.filesArray = filesArray;
 	}
-	
 
-	
 	@Override
 	public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
 		return FileVisitResult.CONTINUE;
@@ -33,7 +29,7 @@ public class FileTree extends SimpleFileVisitor<Path> {
 
 	@Override
 	public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			filesArray.add(file);
+		filesArray.add(file);
 		return FileVisitResult.CONTINUE;
 	}
 
@@ -41,7 +37,5 @@ public class FileTree extends SimpleFileVisitor<Path> {
 	public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
 		return FileVisitResult.CONTINUE;
 	}
-	
-
 
 }
